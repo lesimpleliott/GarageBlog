@@ -1,5 +1,6 @@
 import Navbar from "@/blocks/Navbar";
 import ThemeProvider from "@/components/ThemeProvider";
+import ResponsiveTester from "@/devTools/ResponsiveTester";
 import { config } from "@fortawesome/fontawesome-svg-core";
 import "@fortawesome/fontawesome-svg-core/styles.css";
 import type { Metadata } from "next";
@@ -35,6 +36,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <ThemeProvider>
           <Navbar />
           <main className="page-container flex-1 py-10">{children}</main>
+
+          {/* DevTools */}
+          {process.env.NODE_ENV === "development" && <ResponsiveTester />}
         </ThemeProvider>
       </body>
     </html>

@@ -1,5 +1,5 @@
 @import "tailwindcss";
-@import "./devTools.css";
+@plugin "../devTools/testPlugin.mjs";
 
 @custom-variant dark (&:where(.dark, .dark *));
 
