@@ -1,0 +1,15 @@
+services:
+  db:
+    image: mariadb:11.4
+    environment:
+      MARIADB_ROOT_PASSWORD: dev
+      MARIADB_DATABASE: garageblog
+      MARIADB_USER: garageblog_app
+      MARIADB_PASSWORD: dev
+    ports:
+      - "127.0.0.1:3306:3306"
+    volumes:
+      - db-data:/var/lib/mysql
+
+volumes:
+  db-data:
