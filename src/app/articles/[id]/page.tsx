@@ -1,3 +1,5 @@
+import DeleteArticleButton from "@/blocks/DeleteArticleButton";
+import { deleteArticle } from "@/server/articles/action";
 import { db } from "@/server/db";
 import { articles } from "@/server/db/schema";
 import { dateTimeFormatter } from "@/utils/date";
@@ -29,6 +31,8 @@ export default async function ArticlePage({
     notFound();
   }
 
+  const deleteThisArticle = deleteArticle.bind(null, article.id);
+
   return (
     <>
       <h1>{article.title}</h1>
@@ -40,9 +44,15 @@ export default async function ArticlePage({
         >
           {dateTimeFormatter.format(article.createdAt)}
         </time>
-        <Link href={`/articles/${article.id}/edit`}>
-          <FontAwesomeIcon icon={faEdit} /> Modifier l&apos;article
-        </Link>
+        <div className="flex items-center gap-4 text-sm">
+          <Link
+            href={`/articles/${article.id}/edit`}
+            className="transition-colors hover:text-foreground-secondary"
+          >
+            <FontAwesomeIcon icon={faEdit} /> Modifier
+          </Link>
+          <DeleteArticleButton action={deleteThisArticle} />
+        </div>
       </div>
 
       <p className="mt-4 border-t border-foreground-secondary pt-4">

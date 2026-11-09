@@ -96,3 +96,16 @@ export async function updateArticle(
   revalidatePath("/articles");
   redirect("/articles");
 }
+
+/** Supprime un article, puis renvoie vers la liste. */
+export async function deleteArticle(id: number) {
+  if (!Number.isInteger(id)) {
+    throw new Error("Article invalide.");
+  }
+
+  // DELETE FROM articles WHERE id = ...
+  await db.delete(articles).where(eq(articles.id, id));
+
+  revalidatePath("/articles");
+  redirect("/articles");
+}
