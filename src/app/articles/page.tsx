@@ -1,17 +1,12 @@
 import { db } from "@/server/db";
 import { articles } from "@/server/db/schema";
+import { dateTimeFormatter } from "@/utils/date";
 import { faPlus } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import clsx from "clsx";
 import { desc } from "drizzle-orm";
 import Link from "next/link";
 import { connection } from "next/server";
-
-const dateFormatter = new Intl.DateTimeFormat("fr-FR", {
-  dateStyle: "long",
-  timeStyle: "short",
-  timeZone: "Europe/Paris",
-});
 
 export default async function ArticlesPage() {
   // Relit la base à chaque visite de la page
@@ -32,20 +27,21 @@ export default async function ArticlesPage() {
         {/* TOUS LES ARTICLES */}
         {allArticles.map((article) => (
           // ARTICLE
-          <li key={article.id} className="rounded-lg border">
-            {/* HEADER */}
-            <div className="border-b bg-foreground-secondary/20 px-3 pt-1 pb-2">
-              <h2 className="-mb-2 font-title text-2xl">{article.title}</h2>
-              <time
-                className="text-xs text-foreground-secondary"
-                dateTime={article.createdAt.toISOString()}
-              >
-                {dateFormatter.format(article.createdAt)}
-              </time>
-            </div>
-
-            {/* BODY */}
-            <p className="px-3 py-2">{article.body}</p>
+          <li key={article.id} className="overflow-hidden rounded-lg border">
+            <Link href={`/articles/${article.id}`} className="block h-full">
+              {/* HEADER */}
+              <div className="border-b bg-foreground-secondary/20 px-3 pt-1 pb-2">
+                <h2 className="-mb-2 font-title text-2xl">{article.title}</h2>
+                <time
+                  className="text-xs text-foreground-secondary"
+                  dateTime={article.createdAt.toISOString()}
+                >
+                  {dateTimeFormatter.format(article.createdAt)}
+                </time>
+              </div>
+              {/* BODY */}
+              <p className="px-3 py-2">{article.body}</p>
+            </Link>
           </li>
         ))}
 
