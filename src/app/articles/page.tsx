@@ -1,23 +1,13 @@
-import { db } from "@/server/db";
-import { articles } from "@/server/db/schema";
+import { getArticles } from "@/server/articles/queries";
 import { dateTimeFormatter } from "@/utils/date";
 import { faPlus } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import clsx from "clsx";
-import { desc } from "drizzle-orm";
 import Link from "next/link";
-import { connection } from "next/server";
 
 export default async function ArticlesPage() {
-  // Relit la base à chaque visite de la page
-  await connection();
-
-  // Récupère les articles depuis la base via `db`
-  // (SQL:) SELECT * FROM articles ORDER BY created_at DESC
-  const allArticles = await db
-    .select()
-    .from(articles)
-    .orderBy(desc(articles.createdAt));
+  // Récupère les articles du tableau `articles`
+  const allArticles = await getArticles();
 
   return (
     <>
@@ -48,7 +38,6 @@ export default async function ArticlesPage() {
         {/* AJOUTER UN ARTICLE */}
         <li
           className={clsx(
-            "",
             "rounded-lg border border-dotted transition-colors",
             "border-foreground-secondary hover:border-foreground",
             "hover:bg-foreground-secondary/20",

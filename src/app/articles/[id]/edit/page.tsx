@@ -1,31 +1,14 @@
 import ArticleForm from "@/blocks/ArticleForm";
 import { updateArticle } from "@/server/articles/action";
-import { db } from "@/server/db";
-import { articles } from "@/server/db/schema";
-import { eq } from "drizzle-orm";
-import { notFound } from "next/navigation";
+import { getArticle } from "@/server/articles/queries";
 
 export default async function EditArticlePage({
   params,
 }: PageProps<"/articles/[id]/edit">) {
   const { id } = await params;
+  const article = await getArticle(id);
 
-  const articleId = Number(id);
-  if (!Number.isInteger(articleId)) {
-    notFound();
-  }
-
-  const [article] = await db
-    .select()
-    .from(articles)
-    .where(eq(articles.id, articleId));
-
-  if (!article) {
-    notFound();
-  }
-
-  // updateArticle avec l'id déjà rempli : le formulaire n'a plus qu'à envoyer les champs
-  const updateThisArticle = updateArticle.bind(null, articleId);
+  const updateThisArticle = updateArticle.bind(null, article.id);
 
   return (
     <>
