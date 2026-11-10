@@ -1,20 +1,19 @@
 "use server";
 
 import { db } from "@/server/db";
-import { articles } from "@/server/db/schema";
+import { type ArticleFields, articles } from "@/server/db/schema";
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 /** Réponse renvoyée au formulaire : messages d'erreur et saisie à réafficher. */
 export type ArticleFormState = {
-  errors?: { title?: string; body?: string };
-  values?: { title: string; body: string };
+  errors?: Partial<ArticleFields>;
+  values?: ArticleFields;
 };
 
 type ArticleValidation =
-  | { ok: false; state: ArticleFormState }
-  | { ok: true; data: { title: string; body: string } };
+  { ok: false; state: ArticleFormState } | { ok: true; data: ArticleFields };
 
 function validateArticle(formData: FormData): ArticleValidation {
   // Récupère les données brutes des champs et vérifie que c'est bien du texte
@@ -27,7 +26,7 @@ function validateArticle(formData: FormData): ArticleValidation {
   // Formate (retire les espaces en trop), puis vérifie la saisie et note les erreurs
   const title = rawTitle.trim();
   const body = rawBody.trim();
-  const errors: { title?: string; body?: string } = {};
+  const errors: Partial<ArticleFields> = {};
 
   // Vérifie le TITRE
   if (!title) {

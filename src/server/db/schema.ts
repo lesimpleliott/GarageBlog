@@ -16,3 +16,9 @@ export const articles = mysqlTable("articles", {
     .notNull()
     .default(sql`CURRENT_TIMESTAMP`),
 });
+
+/** TYPE : Un article tel qu'il est lu dans la base. */
+export type Article = typeof articles.$inferSelect;
+
+/** TYPE : Les champs qu'on saisit dans le formulaire d'article. */
+export type ArticleFields = Pick<Article, "title" | "body">;

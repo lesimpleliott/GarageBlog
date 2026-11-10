@@ -1,6 +1,7 @@
 "use client";
 
-import { type ArticleFormState } from "@/server/articles/action";
+import type { ArticleFormState } from "@/server/articles/action";
+import type { ArticleFields } from "@/server/db/schema";
 import clsx from "clsx";
 import { useActionState } from "react";
 
@@ -9,7 +10,7 @@ type ArticleFormProps = {
     state: ArticleFormState,
     formData: FormData,
   ) => Promise<ArticleFormState>;
-  defaultValues?: { title: string; body: string };
+  defaultValues?: ArticleFields;
 };
 
 // Réponse de départ, vide : le serveur n'a encore rien répondu
