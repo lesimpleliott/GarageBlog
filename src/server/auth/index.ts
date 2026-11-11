@@ -2,6 +2,7 @@ import { db } from "@/server/db";
 import * as authSchema from "@/server/db/auth-schema";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
+import { nextCookies } from "better-auth/next-js";
 
 /** Authentification du site : comptes, connexion et sessions. */
 export const auth = betterAuth({
@@ -12,4 +13,5 @@ export const auth = betterAuth({
   emailAndPassword: {
     enabled: true,
   },
+  plugins: [nextCookies()],
 });

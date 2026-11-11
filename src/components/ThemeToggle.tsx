@@ -32,7 +32,7 @@ export default function ThemeToggle() {
       title={label}
       onClick={() => setTheme(isDark ? "light" : "dark")}
       className={clsx(
-        "inline-flex size-6 cursor-pointer items-center justify-center",
+        "inline-flex size-6 cursor-pointer items-center justify-center text-lg",
         "text-foreground transition-colors hover:text-foreground-secondary",
       )}
     >

@@ -1,3 +1,4 @@
+import AuthButton from "@/components/AuthButton";
 import ThemeToggle from "@/components/ThemeToggle";
 import clsx from "clsx";
 import Link from "next/link";
@@ -28,7 +29,10 @@ export default function Navbar() {
         </div>
 
         {/* Actions */}
-        <ThemeToggle />
+        <div className="flex gap-2">
+          <ThemeToggle />
+          <AuthButton />
+        </div>
       </nav>
     </header>
   );
