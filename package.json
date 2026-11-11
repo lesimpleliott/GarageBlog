@@ -14,7 +14,12 @@
     "start": "next start",
     "lint": "eslint",
     "prepare": "husky",
-    "user:create": "tsx --env-file=.env.local scripts/create-user.ts"
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
+    "db:migrate:prod": "ENV_FILE=.env.o2switch drizzle-kit migrate",
+    "db:studio": "drizzle-kit studio --host 127.0.0.1",
+    "user:create": "tsx --env-file=.env.local scripts/create-user.ts",
+    "user:create:prod": "tsx --env-file=.env.o2switch scripts/create-user.ts"
   },
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^7.3.1",

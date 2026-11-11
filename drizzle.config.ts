@@ -1,9 +1,10 @@
 import { defineConfig } from "drizzle-kit";
 
-process.loadEnvFile(".env.local"); // Charge .env.local dans process.env, que drizzle-kit ne lit pas seul.
+// Fichier de variables à charger : .env.local par défaut, ou celui indiqué par ENV_FILE
+process.loadEnvFile(process.env.ENV_FILE ?? ".env.local");
 
 export default defineConfig({
-  dialect: "mysql", // language SQL utilisé
+  dialect: "mysql", // langage SQL utilisé
   schema: ["./src/server/db/schema.ts", "./src/server/db/auth-schema.ts"], // le plan des bases pour `generate`
   out: "./drizzle", // où stocker les migrations et /meta
   dbCredentials: {
