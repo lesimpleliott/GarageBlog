@@ -1,4 +1,5 @@
 import { getArticles } from "@/server/articles/queries";
+import { getSession } from "@/server/auth/queries";
 import { dateTimeFormatter } from "@/utils/date";
 import { faPlus } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -6,6 +7,9 @@ import clsx from "clsx";
 import Link from "next/link";
 
 export default async function ArticlesPage() {
+  // Récupère la session (null pour un visiteur) pour afficher ou non les boutons
+  const session = await getSession();
+
   // Récupère les articles du tableau `articles`
   const allArticles = await getArticles();
 
@@ -36,25 +40,30 @@ export default async function ArticlesPage() {
         ))}
 
         {/* AJOUTER UN ARTICLE */}
-        <li
-          className={clsx(
-            "rounded-lg border border-dotted transition-colors",
-            "border-foreground-secondary hover:border-foreground",
-            "hover:bg-foreground-secondary/20",
-            "text-foreground-secondary hover:text-foreground",
-          )}
-        >
-          <Link
-            href="/articles/new"
-            className={clsx("h-full", "flex items-center justify-center gap-2")}
+        {session && (
+          <li
+            className={clsx(
+              "rounded-lg border border-dotted transition-colors",
+              "border-foreground-secondary hover:border-foreground",
+              "hover:bg-foreground-secondary/20",
+              "text-foreground-secondary hover:text-foreground",
+            )}
           >
-            <FontAwesomeIcon
-              icon={faPlus}
-              className="rounded-full border px-0.5 py-1"
-            />
-            <span className="font-title text-2xl">Créer un article</span>
-          </Link>
-        </li>
+            <Link
+              href="/articles/new"
+              className={clsx(
+                "h-full",
+                "flex items-center justify-center gap-2",
+              )}
+            >
+              <FontAwesomeIcon
+                icon={faPlus}
+                className="rounded-full border px-0.5 py-1"
+              />
+              <span className="font-title text-2xl">Créer un article</span>
+            </Link>
+          </li>
+        )}
       </ul>
     </>
   );

@@ -1,10 +1,14 @@
 import ArticleForm from "@/blocks/ArticleForm";
 import { updateArticle } from "@/server/articles/actions";
 import { getArticle } from "@/server/articles/queries";
+import { requireSession } from "@/server/auth/queries";
 
 export default async function EditArticlePage({
   params,
 }: PageProps<"/articles/[id]/edit">) {
+  // Vérifie qu'un utilisateur est connecté avant de continuer
+  await requireSession();
+
   const { id } = await params;
   const article = await getArticle(id);
 

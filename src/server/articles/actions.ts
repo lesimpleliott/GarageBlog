@@ -1,5 +1,6 @@
 "use server";
 
+import { requireSession } from "@/server/auth/queries";
 import { db } from "@/server/db";
 import { type ArticleFields, articles } from "@/server/db/schema";
 import { eq } from "drizzle-orm";
@@ -56,6 +57,9 @@ export async function createArticle(
   _prevState: ArticleFormState,
   formData: FormData,
 ): Promise<ArticleFormState> {
+  // Vérifie qu'un utilisateur est connecté avant de continuer
+  await requireSession();
+
   const result = validateArticle(formData);
   if (!result.ok) {
     return result.state;
@@ -75,6 +79,9 @@ export async function updateArticle(
   _prevState: ArticleFormState,
   formData: FormData,
 ): Promise<ArticleFormState> {
+  // Vérifie qu'un utilisateur est connecté avant de continuer
+  await requireSession();
+
   if (!Number.isInteger(id)) {
     throw new Error("Article invalide.");
   }
@@ -94,6 +101,9 @@ export async function updateArticle(
 
 /** Supprime un article, puis renvoie vers la liste. */
 export async function deleteArticle(id: number) {
+  // Vérifie qu'un utilisateur est connecté avant de continuer
+  await requireSession();
+
   if (!Number.isInteger(id)) {
     throw new Error("Article invalide.");
   }
