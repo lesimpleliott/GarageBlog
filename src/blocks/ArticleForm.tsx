@@ -1,6 +1,6 @@
 "use client";
 
-import type { ArticleFormState } from "@/server/articles/action";
+import type { ArticleFormState } from "@/server/articles/actions";
 import type { ArticleFields } from "@/server/db/schema";
 import clsx from "clsx";
 import { useActionState } from "react";

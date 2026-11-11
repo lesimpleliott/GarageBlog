@@ -1,5 +1,5 @@
 import DeleteArticleButton from "@/blocks/DeleteArticleButton";
-import { deleteArticle } from "@/server/articles/action";
+import { deleteArticle } from "@/server/articles/actions";
 import { getArticle } from "@/server/articles/queries";
 import { dateTimeFormatter } from "@/utils/date";
 import { faEdit } from "@fortawesome/free-solid-svg-icons";

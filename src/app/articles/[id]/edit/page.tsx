@@ -1,5 +1,5 @@
 import ArticleForm from "@/blocks/ArticleForm";
-import { updateArticle } from "@/server/articles/action";
+import { updateArticle } from "@/server/articles/actions";
 import { getArticle } from "@/server/articles/queries";
 
 export default async function EditArticlePage({

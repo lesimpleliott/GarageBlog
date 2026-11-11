@@ -1,5 +1,5 @@
 import ArticleForm from "@/blocks/ArticleForm";
-import { createArticle } from "@/server/articles/action";
+import { createArticle } from "@/server/articles/actions";
 
 export default function NewArticlePage() {
   return (
