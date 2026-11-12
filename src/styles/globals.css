@@ -31,6 +31,27 @@
   @apply mx-auto w-full max-w-7xl px-10;
 }
 
+/*
+ * Tableau de données : à poser sur la <table>.
+ * Style commun (cadre, en-tête, cellules, séparations) ; le style propre à une colonne reste dans la page.
+ */
+@utility data-table {
+  @apply w-full border-separate border-spacing-0 overflow-hidden rounded-lg border border-foreground-secondary text-left text-sm;
+
+  & thead {
+    @apply bg-foreground-secondary/20 font-title text-lg;
+  }
+  & th {
+    @apply px-3 py-1 font-normal;
+  }
+  & td {
+    @apply px-3 py-3;
+  }
+  & tbody tr + tr td {
+    @apply border-t border-foreground-secondary; /* Ligne de sépration entre 2 lignes */
+  }
+}
+
 h1 {
   @apply font-title text-4xl;
 }

@@ -1,31 +1,43 @@
 import AuthButton from "@/components/AuthButton";
 import ThemeToggle from "@/components/ThemeToggle";
+import { getSession } from "@/server/auth/queries";
 import clsx from "clsx";
 import Link from "next/link";
 
-export default function Navbar() {
+/**
+ * Barre de navigation du site.
+ * Les liens marqués `adminOnly` ne s'affichent que pour un admin connecté.
+ * WARNING : les pages admin doivent également être protégées par `requireAdmin()`.
+ */
+export default async function Navbar() {
   const navItems = [
     { href: "/", label: "Home" },
     { href: "/articles", label: "Articles" },
+    { href: "/admin/users", label: "Users", adminOnly: true },
   ];
+
+  const session = await getSession();
+  const isAdmin = session?.user.role === "admin";
 
   return (
     <header className="w-full border-b border-foreground-secondary py-4">
       <nav className="page-container flex items-center justify-between">
         {/* Nav items */}
         <div className="flex items-center gap-6">
-          {navItems.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={clsx(
-                "text-foreground transition-colors hover:text-foreground-secondary",
-                "font-title text-3xl",
-              )}
-            >
-              {item.label}
-            </Link>
-          ))}
+          {navItems
+            .filter((i) => !i.adminOnly || isAdmin)
+            .map((i) => (
+              <Link
+                key={i.href}
+                href={i.href}
+                className={clsx(
+                  "text-foreground transition-colors hover:text-foreground-secondary",
+                  "font-title text-3xl",
+                )}
+              >
+                {i.label}
+              </Link>
+            ))}
         </div>
 
         {/* Actions */}
