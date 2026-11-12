@@ -58,15 +58,17 @@ export async function createArticle(
   formData: FormData,
 ): Promise<ArticleFormState> {
   // Vérifie qu'un utilisateur est connecté avant de continuer
-  await requireSession();
+  const session = await requireSession();
 
   const result = validateArticle(formData);
   if (!result.ok) {
     return result.state;
   }
 
-  // INSERT INTO articles (title, body) VALUES (...)
-  await db.insert(articles).values(result.data);
+  // INSERT INTO articles (title, body, author_id) VALUES (...)
+  await db
+    .insert(articles)
+    .values({ ...result.data, authorId: session.user.id });
 
   // Rafraîchit la liste des articles et y renvoie l'utilisateur
   revalidatePath("/articles");

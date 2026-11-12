@@ -10,7 +10,7 @@ export default async function AuthButton() {
   const session = await getSession();
 
   const iconClassName = clsx(
-    "inline-flex size-6 cursor-pointer items-center justify-center text-lg",
+    "w-full inline-flex size-6 cursor-pointer items-center justify-center text-lg",
     "text-foreground transition-colors",
   );
 
@@ -24,6 +24,7 @@ export default async function AuthButton() {
             title={`Connecté : ${session.user.name}`}
             className={clsx(iconClassName, "hover:text-red-600")}
           >
+            <p className="mr-1 text-sm italic">({session.user.name})</p>
             <FontAwesomeIcon icon={faSignOut} />
           </button>
         </form>
