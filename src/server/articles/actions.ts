@@ -2,7 +2,7 @@
 
 import { requireSession } from "@/server/auth/queries";
 import { db } from "@/server/db";
-import { type ArticleFields, articles } from "@/server/db/schema";
+import { type ArticleFields, articles } from "@/server/db/schema/articles";
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";

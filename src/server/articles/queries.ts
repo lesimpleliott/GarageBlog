@@ -1,5 +1,5 @@
 import { db } from "@/server/db";
-import { articles } from "@/server/db/schema";
+import { articles } from "@/server/db/schema/articles";
 import { desc, eq } from "drizzle-orm";
 import { notFound } from "next/navigation";
 import { connection } from "next/server";
