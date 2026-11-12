@@ -14,6 +14,7 @@
     "start": "next start",
     "lint": "eslint",
     "prepare": "husky",
+    "package:o2switch": "bash scripts/package-o2switch.sh",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "db:migrate:prod": "ENV_FILE=.env.o2switch drizzle-kit migrate",
