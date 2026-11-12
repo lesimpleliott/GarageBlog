@@ -7,11 +7,8 @@ import clsx from "clsx";
 import Link from "next/link";
 
 export default async function ArticlesPage() {
-  // Récupère la session (null pour un visiteur) pour afficher ou non les boutons
-  const session = await getSession();
-
-  // Récupère les articles du tableau `articles`
-  const allArticles = await getArticles();
+  const session = await getSession(); // Récupère la session (null pour un visiteur) pour afficher ou non les boutons
+  const allArticles = await getArticles(); // Récupère les articles du tableau `articles`
 
   return (
     <>
@@ -25,13 +22,13 @@ export default async function ArticlesPage() {
             <Link href={`/articles/${article.id}`} className="block h-full">
               {/* HEADER */}
               <div className="border-b bg-foreground-secondary/20 px-3 pt-1 pb-2">
-                <h2 className="-mb-2 font-title text-2xl">{article.title}</h2>
-                <time
-                  className="text-xs text-foreground-secondary"
-                  dateTime={article.createdAt.toISOString()}
-                >
-                  {dateTimeFormatter.format(article.createdAt)}
-                </time>
+                <h2 className="font-title text-2xl">{article.title}</h2>
+                <p className="text-xs text-foreground-secondary">
+                  Écrit par {article.authorName}{" "}
+                  <time dateTime={article.createdAt.toISOString()}>
+                    le {dateTimeFormatter.format(article.createdAt)}
+                  </time>
+                </p>
               </div>
               {/* BODY */}
               <p className="px-3 py-2">{article.body}</p>

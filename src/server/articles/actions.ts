@@ -1,5 +1,6 @@
 "use server";
 
+import { requireEditableArticle } from "@/server/articles/permissions";
 import { requireSession } from "@/server/auth/queries";
 import { db } from "@/server/db";
 import { type ArticleFields, articles } from "@/server/db/schema/articles";
@@ -75,18 +76,24 @@ export async function createArticle(
   redirect("/articles");
 }
 
-/** MODIFIER UN ARTICLE AVEC SON ID */
+/**
+ * Modifie un article, puis renvoie vers la liste.
+ *
+ * Réservé à l'auteur de l'article ou à un admin (`requireEditableArticle`) : sinon, lance une erreur.
+ * Si la saisie est invalide, rien n'est écrit et les erreurs sont renvoyées au formulaire.
+ *
+ * @param articleId - l'id de l'article, fixé par `.bind` dans la page d'édition
+ * @param _prevState - l'état précédent du formulaire, transmis par `useActionState` (inutilisé)
+ * @param formData - les champs envoyés par le formulaire (`title`, `body`)
+ * @returns les erreurs et la saisie à réafficher, si la saisie est invalide
+ */
 export async function updateArticle(
-  id: number,
+  articleId: number,
   _prevState: ArticleFormState,
   formData: FormData,
 ): Promise<ArticleFormState> {
-  // Vérifie qu'un utilisateur est connecté avant de continuer
-  await requireSession();
-
-  if (!Number.isInteger(id)) {
-    throw new Error("Article invalide.");
-  }
+  // Vérifie que l'article existe et que l'utilisateur a la permission d'édition de celui-ci
+  await requireEditableArticle(articleId);
 
   const result = validateArticle(formData);
   if (!result.ok) {
@@ -94,24 +101,26 @@ export async function updateArticle(
   }
 
   // UPDATE du tableau `articles`
-  await db.update(articles).set(result.data).where(eq(articles.id, id));
+  await db.update(articles).set(result.data).where(eq(articles.id, articleId));
 
   // Rafraîchit la liste des articles et y renvoie l'utilisateur
   revalidatePath("/articles");
   redirect("/articles");
 }
 
-/** Supprime un article, puis renvoie vers la liste. */
-export async function deleteArticle(id: number) {
-  // Vérifie qu'un utilisateur est connecté avant de continuer
-  await requireSession();
-
-  if (!Number.isInteger(id)) {
-    throw new Error("Article invalide.");
-  }
+/**
+ * Supprime un article, puis renvoie vers la liste.
+ *
+ * Réservé à l'auteur de l'article ou à un admin (`requireEditableArticle`) : sinon, lance une erreur.
+ *
+ * @param articleId - l'id de l'article, fixé par `.bind` dans la page de l'article
+ */
+export async function deleteArticle(articleId: number) {
+  // Vérifie que l'article existe et que l'utilisateur a la permission d'édition de celui-ci
+  await requireEditableArticle(articleId);
 
   // DELETE FROM articles WHERE id = ...
-  await db.delete(articles).where(eq(articles.id, id));
+  await db.delete(articles).where(eq(articles.id, articleId));
 
   revalidatePath("/articles");
   redirect("/articles");

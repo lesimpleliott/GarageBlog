@@ -1,5 +1,6 @@
 import DeleteArticleButton from "@/blocks/DeleteArticleButton";
 import { deleteArticle } from "@/server/articles/actions";
+import { canEditArticle } from "@/server/articles/permissions";
 import { getArticle } from "@/server/articles/queries";
 import { getSession } from "@/server/auth/queries";
 import { dateTimeFormatter } from "@/utils/date";
@@ -10,12 +11,12 @@ import Link from "next/link";
 export default async function ArticlePage({
   params,
 }: PageProps<"/articles/[id]">) {
-  // Récupère la session (null pour un visiteur) pour afficher ou non les boutons
-  const session = await getSession();
+  const session = await getSession(); // Récupère la session (null pour un visiteur) pour afficher ou non les boutons
+  const { id } = await params; // récupère l'id dans l'URL
+  const article = await getArticle(id); // Récupère l'article à partir de son id
+  const canEdit = session && canEditArticle(session.user, article); // Vérifie les permissions de l'utilisateur
 
-  const { id } = await params;
-  const article = await getArticle(id);
-
+  // Fonction de suppression d'un article
   const deleteThisArticle = deleteArticle.bind(null, article.id);
 
   return (
@@ -23,13 +24,13 @@ export default async function ArticlePage({
       <h1>{article.title}</h1>
 
       <div className="flex items-center justify-between">
-        <time
-          className="text-sm text-foreground-secondary"
-          dateTime={article.createdAt.toISOString()}
-        >
-          {dateTimeFormatter.format(article.createdAt)}
-        </time>
-        {session && (
+        <p className="text-sm text-foreground-secondary">
+          Écrit par <strong>{article.authorName}</strong>{" "}
+          <time dateTime={article.createdAt.toISOString()}>
+            le {dateTimeFormatter.format(article.createdAt)}
+          </time>
+        </p>
+        {canEdit && (
           <div className="flex items-center gap-4 text-sm">
             <Link
               href={`/articles/${article.id}/edit`}
