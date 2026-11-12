@@ -5,9 +5,9 @@ import { createInterface } from "node:readline/promises";
 /**
  * Crée un compte utilisateur, directement dans la base.
  *
- * Ce script est la seule porte d'entrée et sert avant tout à créer le premier super-admin.
- * L'inscription publique étant fermée (`disableSignUp` dans `src/server/auth/index.ts`) : sur une base vide,
- * aucun compte n'existe et personne ne peut en créer depuis le site.
+ * L'inscription publique étant fermée (`disableSignUp` dans `src/server/auth/index.ts`),
+ * c'est le seul moyen de créer un compte sur une base vide.
+ * Le compte reçoit le rôle par défaut (`author`) ; pour en faire un admin : `npm run user:set-admin`.
  *
  * Lancement : `npm run user:create`, depuis la machine d'un développeur. Il écrit
  * dans la base indiquée par `DATABASE_URL` (Docker en local, o2switch en ligne).

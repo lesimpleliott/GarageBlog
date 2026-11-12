@@ -15,6 +15,13 @@
       "when": 1794344513118,
       "tag": "0001_loose_marvex",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1794489517601,
+      "tag": "0002_silky_bullseye",
+      "breakpoints": true
     }
   ]
 }

@@ -19,7 +19,9 @@
     "db:migrate:prod": "ENV_FILE=.env.o2switch drizzle-kit migrate",
     "db:studio": "drizzle-kit studio --host 127.0.0.1",
     "user:create": "tsx --env-file=.env.local scripts/create-user.ts",
-    "user:create:prod": "tsx --env-file=.env.o2switch scripts/create-user.ts"
+    "user:create:prod": "tsx --env-file=.env.o2switch scripts/create-user.ts",
+    "user:set-admin": "tsx --env-file=.env.local scripts/set-admin.ts",
+    "user:set-admin:prod": "tsx --env-file=.env.o2switch scripts/set-admin.ts"
   },
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^7.3.1",
