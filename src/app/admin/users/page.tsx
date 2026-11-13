@@ -1,4 +1,6 @@
+import RoleSelect from "@/blocks/RoleSelect";
 import { requireAdmin } from "@/server/auth/queries";
+import { setUserRole } from "@/server/users/actions";
 import { getUsers } from "@/server/users/queries";
 import { dateTimeFormatter } from "@/utils/date";
 import clsx from "clsx";
@@ -36,7 +38,13 @@ export default async function UsersPage() {
                 <td className="text-foreground-secondary">{user.email}</td>
 
                 {/* Rôle */}
-                <td>{user.role}</td>
+                <td>
+                  <RoleSelect
+                    action={setUserRole.bind(null, user.id)} // Sans rôle, Better Auth applique le rôle par défaut : `author`
+                    userRole={user.role ?? "author"} // Recrée le composant quand le rôle enregistré change, pour qu'il reparte du nouveau rôle
+                    key={user.role}
+                  />
+                </td>
 
                 {/* Statut */}
                 <td>
