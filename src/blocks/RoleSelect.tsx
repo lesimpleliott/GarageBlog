@@ -8,6 +8,7 @@ import { useState } from "react";
 
 type RoleSelectProps = {
   userRole: string;
+  userName: string;
   action: (formData: FormData) => Promise<void>;
 };
 
@@ -19,17 +20,23 @@ type RoleSelectProps = {
  * Un rôle enregistré mais absent du code (ex. supprimé depuis) apparaît comme option désactivée, pour ne pas afficher à tort le premier rôle de la liste.
  *
  * @param userRole - le rôle enregistré en base
+ * @param userName - le nom du compte, pour les libellés lus par les lecteurs d'écran
  * @param action - `setUserRole`, avec l'id du compte fixé par `.bind`
  */
-export default function RoleSelect({ userRole, action }: RoleSelectProps) {
+export default function RoleSelect({
+  userRole,
+  userName,
+  action,
+}: RoleSelectProps) {
   const [currentRole, setCurrentRole] = useState(userRole);
   const isDirty = currentRole !== userRole;
   const isUnknownRole = !isRole(userRole);
 
   return (
-    <form action={action} className="flex items-center gap-2">
+    <form action={action} className="ml-8 flex items-center justify-center">
       <select
         name="role"
+        aria-label={`Rôle de ${userName}`}
         defaultValue={userRole}
         onChange={(e) => setCurrentRole(e.target.value)}
         className={clsx(isDirty && "text-red-700 italic")}
@@ -51,7 +58,7 @@ export default function RoleSelect({ userRole, action }: RoleSelectProps) {
 
       <button
         type="submit"
-        aria-label="Enregistrer le rôle"
+        aria-label={`Enregistrer le rôle de ${userName}`}
         className={clsx(
           isDirty ? "opacity-100" : "opacity-0",
           "text-red-700 transition-colors hover:text-red-800",

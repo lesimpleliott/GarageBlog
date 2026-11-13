@@ -39,3 +39,56 @@ export async function setUserRole(userId: string, formData: FormData) {
   // Rafraîchit la liste des comptes
   revalidatePath("/admin/users");
 }
+
+/**
+ * Change le statut d'un compte, via le guichet `banUser` de Better Auth, puis rafraîchit la liste des comptes.
+ *  - Réservé aux admins : `requireAdmin()` renvoie vers `/login` ou une 404, et Better Auth vérifie à nouveau.
+ *  - Refuse de modifier son propre statut : seul un autre admin peut le faire.
+ *  - Déconnecte immédiatement le compte : Better Auth supprime toutes ses sessions.
+ *
+ * @param userId - l'id du compte visé, fixé par `.bind` dans la page `/admin/users`
+ */
+export async function disableUser(userId: string) {
+  // Vérifie qu'un admin est connecté avant de continuer
+  const session = await requireAdmin();
+
+  // Rend impossible la modification de son propre statut
+  if (session.user.id === userId) {
+    throw new Error("Impossible de modifier son propre statut.");
+  }
+
+  // UPDATE de la colonne `banned` du tableau `user`. Les en-têtes portent le cookie : Better Auth vérifie que c'est un admin qui demande
+  await auth.api.banUser({
+    headers: await headers(),
+    body: { userId: userId },
+  });
+
+  // Rafraîchit la liste des comptes
+  revalidatePath("/admin/users");
+}
+
+/**
+ * Change le statut d'un compte, via le guichet `unbanUser` de Better Auth, puis rafraîchit la liste des comptes.
+ *  - Réservé aux admins : `requireAdmin()` renvoie vers `/login` ou une 404, et Better Auth vérifie à nouveau.
+ *  - Refuse de modifier son propre statut : seul un autre admin peut le faire.
+ *
+ * @param userId - l'id du compte visé, fixé par `.bind` dans la page `/admin/users`
+ */
+export async function enableUser(userId: string) {
+  // Vérifie qu'un admin est connecté avant de continuer
+  const session = await requireAdmin();
+
+  // Rend impossible la modification de son propre statut
+  if (session.user.id === userId) {
+    throw new Error("Impossible de modifier son propre statut.");
+  }
+
+  // UPDATE de la colonne `banned` du tableau `user`. Les en-têtes portent le cookie : Better Auth vérifie que c'est un admin qui demande
+  await auth.api.unbanUser({
+    headers: await headers(),
+    body: { userId: userId },
+  });
+
+  // Rafraîchit la liste des comptes
+  revalidatePath("/admin/users");
+}
