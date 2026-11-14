@@ -3,6 +3,7 @@
 import { auth } from "@/server/auth";
 import { requireAdmin } from "@/server/auth/queries";
 import { isRole } from "@/utils/roles";
+import { isAPIError } from "better-auth/api";
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 
@@ -91,4 +92,80 @@ export async function enableUser(userId: string) {
 
   // Rafraîchit la liste des comptes
   revalidatePath("/admin/users");
+}
+
+/** Réponse renvoyée au formulaire d'invitation. */
+export type InviteUserFormState = {
+  error?: string;
+  sent?: boolean;
+  name?: string; // Renvoyé avec une erreur, pour ne pas vider le champ
+  email?: string; // Idem
+};
+
+/**
+ * Invite une personne : crée son compte sans mot de passe, puis lui envoie un lien pour le choisir.
+ *  - Réservé aux admins : `requireAdmin()` renvoie vers `/login` ou une 404, et Better Auth vérifie à nouveau.
+ *  - Le lien réutilise le mécanisme du mot de passe oublié, avec `?invite=1` dans l'adresse de retour :
+ *    `sendResetPassword` (`@/server/auth`) y lit qu'il faut envoyer l'e-mail d'invitation.
+ *  - Renvoie une erreur au formulaire si le nom est vide, si l'adresse est invalide ou déjà utilisée.
+ *  - Lance une erreur si le formulaire a été trafiqué (champ absent, rôle inconnu).
+ *
+ * @param _prevState - la réponse précédente, imposée par `useActionState` et inutilisée
+ * @param formData - les champs `name`, `email` et `role`
+ */
+export async function inviteUser(
+  _prevState: InviteUserFormState,
+  formData: FormData,
+): Promise<InviteUserFormState> {
+  // Vérifie qu'un admin est connecté avant de continuer
+  await requireAdmin();
+
+  // Récupère les champs : ce qui vient d'un formulaire n'est jamais fiable
+  const rawEmail = formData.get("email");
+  const rawName = formData.get("name");
+  const role = formData.get("role");
+  if (typeof rawName !== "string" || typeof rawEmail !== "string") {
+    throw new Error("Nom ou E-mail non conforme.");
+  }
+
+  // Nettoie les valeurs : sans espaces autour, adresse en minuscules (évite les doublons)
+  const email = rawEmail.trim().toLowerCase();
+  const name = rawName.trim();
+  if (name.length === 0) {
+    return { error: "Le nom est obligatoire.", name, email };
+  }
+  if (!isRole(role)) {
+    throw new Error("Rôle invalide.");
+  }
+
+  // Crée le compte, sans mot de passe : la personne le choisira avec le lien de l'e-mail.
+  // Better Auth vérifie aussi le format de l'adresse et qu'aucun compte ne l'utilise déjà
+  try {
+    await auth.api.createUser({
+      headers: await headers(),
+      body: { name, email, role },
+    });
+  } catch (error) {
+    if (isAPIError(error)) {
+      return {
+        error:
+          error.body?.code === "USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL"
+            ? "Un compte existe déjà avec cette adresse."
+            : "Adresse e-mail invalide.",
+        name,
+        email,
+      };
+    }
+    throw error;
+  }
+
+  // Demande le lien de création du mot de passe. `?invite=1` fait choisir l'e-mail d'invitation à `sendResetPassword`
+  await auth.api.requestPasswordReset({
+    headers: await headers(),
+    body: { email, redirectTo: "/reset-password?invite=1" },
+  });
+
+  // Rafraîchit la liste des comptes, où apparaît le nouveau compte
+  revalidatePath("/admin/users");
+  return { sent: true };
 }

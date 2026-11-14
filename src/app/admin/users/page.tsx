@@ -1,3 +1,4 @@
+import InviteUserForm from "@/blocks/InviteUserForm";
 import RoleSelect from "@/blocks/RoleSelect";
 import Tooltip from "@/components/Tooltip";
 import { requireAdmin } from "@/server/auth/queries";
@@ -15,8 +16,20 @@ export default async function UsersPage() {
     <>
       <h1>Comptes</h1>
 
+      {/* CREATION NOUVEAU */}
+      <section className="mt-4">
+        <h2 className="mb-2 text-foreground-secondary">
+          Créer un nouvel utilisateur
+        </h2>
+
+        <InviteUserForm />
+      </section>
+
       {/* TABLEAU */}
-      <div className="mt-4">
+      <section className="mt-4">
+        <h2 className="mb-2 text-foreground-secondary">
+          Les comptes utilisateurs
+        </h2>
         <table className="data-table">
           {/* En-tête des colonnes */}
           <thead>
@@ -136,7 +149,7 @@ export default async function UsersPage() {
             })}
           </tbody>
         </table>
-      </div>
+      </section>
     </>
   );
 }
