@@ -9,7 +9,7 @@ type Email = {
 /**
  * La connexion au serveur SMTP d'o2switch, créée une seule fois pour tout le site.
  * Rien n'est envoyé ni connecté à sa création : la connexion n'a lieu qu'au premier `sendMail`.
- * Les variables `SMTP_*` sont nécessaires qu'en production.
+ * Les variables `SMTP_*` ne sont nécessaires qu'en production.
  */
 const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST,
@@ -33,11 +33,23 @@ const transporter = nodemailer.createTransport({
 export async function sendEmail({ to, subject, text }: Email) {
   // En local : on affiche la lettre dans le terminal, sans rien envoyer
   if (process.env.NODE_ENV !== "production") {
-    console.log({ to, subject, text });
+    // Affiché comme texte simple : sinon les retours à la ligne deviennent « \n » et se collent aux liens copiés
+    console.log(
+      [
+        "",
+        "--- E-mail non envoyé (local) ---",
+        `À : ${to}`,
+        `Sujet : ${subject}`,
+        "",
+        text,
+        "---------------------------------",
+        "",
+      ].join("\n"),
+    );
     return;
   }
 
-  // En production : on tend la lettre au guichet
+  // En production : on envoie via nodemailer
   await transporter.sendMail({
     from: process.env.EMAIL_FROM,
     to,

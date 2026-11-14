@@ -1,6 +1,7 @@
 "use client";
 
 import { signIn, type SignInFormState } from "@/server/auth/actions";
+import Link from "next/link";
 import { useActionState } from "react";
 
 const initialState: SignInFormState = {};
@@ -34,7 +35,7 @@ export default function SignInForm() {
         />
       </label>
 
-      <div className="mt-2 flex flex-row items-center gap-4">
+      <div className="mt-2 flex flex-row items-end justify-between gap-4">
         <button
           type="submit"
           disabled={pending}
@@ -42,11 +43,18 @@ export default function SignInForm() {
         >
           {pending ? "Connexion…" : "Se connecter"}
         </button>
-
-        <p role="alert" className="text-sm text-red-600">
-          {state.error}
-        </p>
+        <Link
+          href="/forgot-password"
+          className="-mt-2 text-right text-sm text-foreground-secondary underline transition-colors hover:text-foreground"
+        >
+          Mot de passe oublié ?
+        </Link>
       </div>
+
+      {/* Affichage Erreur */}
+      <p role="alert" className="text-sm text-red-600">
+        {state.error}
+      </p>
     </form>
   );
 }
