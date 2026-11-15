@@ -1,4 +1,4 @@
-import ChooseNewPasswordForm from "@/blocks/ChooseNewPasswordForm";
+import ChooseNewPasswordForm from "@/blocks/auth/ChooseNewPasswordForm";
 import Link from "next/link";
 
 /**

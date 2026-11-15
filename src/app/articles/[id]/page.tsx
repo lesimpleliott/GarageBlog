@@ -1,4 +1,4 @@
-import DeleteArticleButton from "@/blocks/DeleteArticleButton";
+import DeleteArticleButton from "@/blocks/articles/DeleteArticleButton";
 import { deleteArticle } from "@/server/articles/actions";
 import { canEditArticle } from "@/server/articles/permissions";
 import { getArticle } from "@/server/articles/queries";

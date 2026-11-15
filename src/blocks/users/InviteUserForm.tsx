@@ -9,7 +9,7 @@ import { useActionState, useEffect, useState } from "react";
 const initialState: InviteUserFormState = {};
 
 /**
- * Formulaire d'invitation, en haut de `/admin/users` : nom, e-mail et rôle de la personne à inviter.
+ * Formulaire d'invitation, en haut de `/users` : nom, e-mail et rôle de la personne à inviter.
  * `inviteUser` crée le compte sans mot de passe et envoie l'e-mail d'invitation.
  *
  * Après un succès, le bouton passe au vert (« Invitation envoyée ! ») quelques secondes,

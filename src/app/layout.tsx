@@ -1,9 +1,9 @@
-import Navbar from "@/blocks/Navbar";
-import ThemeProvider from "@/components/ThemeProvider";
+import Navbar from "@/blocks/navbar/Navbar";
 import ResponsiveTester from "@/devTools/ResponsiveTester";
 import { config } from "@fortawesome/fontawesome-svg-core";
 import "@fortawesome/fontawesome-svg-core/styles.css";
 import type { Metadata } from "next";
+import { ThemeProvider as NextThemesProvider } from "next-themes";
 import { IBM_Plex_Sans, VT323 } from "next/font/google";
 import "../styles/globals.css";
 
@@ -33,13 +33,13 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       suppressHydrationWarning
     >
       <body className="flex min-h-full flex-col bg-background font-main text-foreground">
-        <ThemeProvider>
+        <NextThemesProvider attribute="class">
           <Navbar />
           <main className="page-container flex-1 py-10">{children}</main>
 
           {/* DevTools */}
           {process.env.NODE_ENV === "development" && <ResponsiveTester />}
-        </ThemeProvider>
+        </NextThemesProvider>
       </body>
     </html>
   );

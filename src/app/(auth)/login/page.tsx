@@ -1,4 +1,4 @@
-import SignInForm from "@/blocks/SignInForm";
+import SignInForm from "@/blocks/auth/SignInForm";
 
 export default function LoginPage() {
   return (

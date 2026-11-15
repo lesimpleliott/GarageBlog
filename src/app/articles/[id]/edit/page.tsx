@@ -1,4 +1,4 @@
-import ArticleForm from "@/blocks/ArticleForm";
+import ArticleForm from "@/blocks/articles/ArticleForm";
 import { updateArticle } from "@/server/articles/actions";
 import { canEditArticle } from "@/server/articles/permissions";
 import { getArticle } from "@/server/articles/queries";

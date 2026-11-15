@@ -13,7 +13,7 @@ import { headers } from "next/headers";
  *  - Lance une erreur si le rôle envoyé n'est pas un rôle connu (voir `ROLE_LABELS`).
  *  - Refuse de modifier son propre rôle : seul un autre admin peut le faire.
  *
- * @param userId - l'id du compte visé, fixé par `.bind` dans la page `/admin/users`
+ * @param userId - l'id du compte visé, fixé par `.bind` dans la page `/users`
  * @param formData - les champs envoyés par le formulaire (`role`)
  */
 export async function setUserRole(userId: string, formData: FormData) {
@@ -38,7 +38,7 @@ export async function setUserRole(userId: string, formData: FormData) {
   });
 
   // Rafraîchit la liste des comptes
-  revalidatePath("/admin/users");
+  revalidatePath("/users");
 }
 
 /**
@@ -47,7 +47,7 @@ export async function setUserRole(userId: string, formData: FormData) {
  *  - Refuse de modifier son propre statut : seul un autre admin peut le faire.
  *  - Déconnecte immédiatement le compte : Better Auth supprime toutes ses sessions.
  *
- * @param userId - l'id du compte visé, fixé par `.bind` dans la page `/admin/users`
+ * @param userId - l'id du compte visé, fixé par `.bind` dans la page `/users`
  */
 export async function disableUser(userId: string) {
   // Vérifie qu'un admin est connecté avant de continuer
@@ -65,7 +65,7 @@ export async function disableUser(userId: string) {
   });
 
   // Rafraîchit la liste des comptes
-  revalidatePath("/admin/users");
+  revalidatePath("/users");
 }
 
 /**
@@ -73,7 +73,7 @@ export async function disableUser(userId: string) {
  *  - Réservé aux admins : `requireAdmin()` renvoie vers `/login` ou une 404, et Better Auth vérifie à nouveau.
  *  - Refuse de modifier son propre statut : seul un autre admin peut le faire.
  *
- * @param userId - l'id du compte visé, fixé par `.bind` dans la page `/admin/users`
+ * @param userId - l'id du compte visé, fixé par `.bind` dans la page `/users`
  */
 export async function enableUser(userId: string) {
   // Vérifie qu'un admin est connecté avant de continuer
@@ -91,7 +91,7 @@ export async function enableUser(userId: string) {
   });
 
   // Rafraîchit la liste des comptes
-  revalidatePath("/admin/users");
+  revalidatePath("/users");
 }
 
 /** Réponse renvoyée au formulaire d'invitation. */
@@ -166,6 +166,6 @@ export async function inviteUser(
   });
 
   // Rafraîchit la liste des comptes, où apparaît le nouveau compte
-  revalidatePath("/admin/users");
+  revalidatePath("/users");
   return { sent: true };
 }

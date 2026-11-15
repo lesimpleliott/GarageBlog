@@ -1,4 +1,4 @@
-import ForgotPasswordForm from "@/blocks/ForgotPasswordForm";
+import ForgotPasswordForm from "@/blocks/auth/ForgotPasswordForm";
 
 export default function ForgotPasswordPage() {
   return (

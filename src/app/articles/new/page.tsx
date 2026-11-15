@@ -1,4 +1,4 @@
-import ArticleForm from "@/blocks/ArticleForm";
+import ArticleForm from "@/blocks/articles/ArticleForm";
 import { createArticle } from "@/server/articles/actions";
 import { requireSession } from "@/server/auth/queries";
 

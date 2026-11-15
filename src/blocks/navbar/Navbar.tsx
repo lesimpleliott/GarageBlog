@@ -1,5 +1,5 @@
-import AuthButton from "@/components/AuthButton";
-import ThemeToggle from "@/components/ThemeToggle";
+import AuthButton from "@/blocks/navbar/AuthButton";
+import ThemeToggle from "@/blocks/navbar/ThemeToggle";
 import { getSession } from "@/server/auth/queries";
 import clsx from "clsx";
 import Link from "next/link";
@@ -13,7 +13,7 @@ export default async function Navbar() {
   const navItems = [
     { href: "/", label: "Home" },
     { href: "/articles", label: "Articles" },
-    { href: "/admin/users", label: "Users", adminOnly: true },
+    { href: "/users", label: "Users", adminOnly: true },
   ];
 
   const session = await getSession();

@@ -13,7 +13,7 @@ type RoleSelectProps = {
 };
 
 /**
- * Liste déroulante pour changer le rôle d'un compte, dans le tableau `/admin/users`.
+ * Liste déroulante pour changer le rôle d'un compte, dans le tableau `/users`.
  * Tant que le rôle choisi diffère du rôle enregistré, la liste passe en rouge et le bouton d'enregistrement apparaît.
  *
  * Dans la page, le composant doit avoir `key={user.role}` : il est ainsi recréé après chaque enregistrement, et repart du nouveau rôle (état compris).

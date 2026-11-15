@@ -1,5 +1,5 @@
-import InviteUserForm from "@/blocks/InviteUserForm";
-import RoleSelect from "@/blocks/RoleSelect";
+import InviteUserForm from "@/blocks/users/InviteUserForm";
+import RoleSelect from "@/blocks/users/RoleSelect";
 import Tooltip from "@/components/Tooltip";
 import { requireAdmin } from "@/server/auth/queries";
 import { disableUser, enableUser, setUserRole } from "@/server/users/actions";
