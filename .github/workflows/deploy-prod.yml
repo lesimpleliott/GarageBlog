@@ -1,0 +1,31 @@
+name: Deploy garageBlog
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    name: Build and deploy to sandbox.elegarage.fr
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build standalone app
+        run: npm run build
+        env:
+          # Valeurs factices néssecaires pour le build.
+          # En ligne, ce sont les variables de l'app Node dans cPanel qui seront utilisées.
+          DATABASE_URL: mysql://build:build@127.0.0.1:3306/build
+          BETTER_AUTH_SECRET: build-only-not-a-real-secret
+          BETTER_AUTH_URL: https://sandbox.elegarage.fr
