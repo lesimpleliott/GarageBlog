@@ -90,7 +90,47 @@ jobs:
           ssh -i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=yes \
             ${{ vars.CPANEL_USER }}@${{ vars.CPANEL_SERVER }} "echo SSH OK"
 
-      # Les prochains blocs (envoi, installation) viendront ici
+      - name: Upload release archive
+        run: |
+          scp -i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=yes \
+            "$RUNNER_TEMP/garageblog.tar.gz" \
+            ${{ vars.CPANEL_USER }}@${{ vars.CPANEL_SERVER }}:${{ vars.DEPLOY_PATH }}.tar.gz
+
+      - name: Install release on o2switch
+        run: |
+          ssh -i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=yes \
+            ${{ vars.CPANEL_USER }}@${{ vars.CPANEL_SERVER }} '
+              set -euo pipefail
+
+              DEPLOY_PATH="${{ vars.DEPLOY_PATH }}"
+              ARCHIVE="${DEPLOY_PATH}.tar.gz"
+
+              # Garde-fou : jamais de suppression si le chemin est vide ou la racine
+              if [ -z "$DEPLOY_PATH" ] || [ "$DEPLOY_PATH" = "/" ]; then
+                echo "DEPLOY_PATH vide ou dangereux" >&2
+                exit 1
+              fi
+
+              test -f "$ARCHIVE"
+              test -d "$DEPLOY_PATH"
+
+              # Supprime seulement l ancien site, comme à la main (le reste du dossier est gardé)
+              cd "$DEPLOY_PATH"
+              rm -rf .next node_modules public server.js package.json
+              tar -xzf "$ARCHIVE" -C "$DEPLOY_PATH"
+              rm -f "$ARCHIVE"
+
+              # Le nouveau site doit être complet
+              test -f server.js
+              test -f .next/BUILD_ID
+              test -d .next/static
+
+              # Passenger redémarre l app au prochain passage s il voit ce fichier modifié
+              mkdir -p tmp
+              touch tmp/restart.txt
+              ls -la
+            '
+
       - name: Cleanup SSH whitelist
         if: always()
         run: |
