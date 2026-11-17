@@ -29,3 +29,26 @@ jobs:
           DATABASE_URL: mysql://build:build@127.0.0.1:3306/build
           BETTER_AUTH_SECRET: build-only-not-a-real-secret
           BETTER_AUTH_URL: https://sandbox.elegarage.fr
+
+      - name: Prepare standalone bundle
+        run: |
+          # Next ne copie ni les fichiers statiques (CSS, JS) ni public/ dans standalone
+          rm -rf .next/standalone/.next/static .next/standalone/public
+          cp -R .next/static .next/standalone/.next/static
+          mkdir -p .next/standalone/public
+          if [ -d public ]; then cp -R public/. .next/standalone/public; fi
+
+          # Le bundle doit être complet, sinon on s'arrête ici
+          test -f .next/standalone/server.js
+          test -f .next/standalone/.next/BUILD_ID
+          test -d .next/standalone/.next/static
+
+          # Aucun fichier de variables ne doit partir sur le serveur
+          if [ -n "$(find .next/standalone -maxdepth 3 -name '.env*')" ]; then
+            echo "Un fichier .env se trouve dans standalone" >&2
+            exit 1
+          fi
+
+          # L'archive à envoyer, rangée dans le dossier temporaire de la machine GitHub
+          tar -czf "$RUNNER_TEMP/garageblog.tar.gz" -C .next/standalone .
+          ls -lh "$RUNNER_TEMP/garageblog.tar.gz"
