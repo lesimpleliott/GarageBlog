@@ -36,7 +36,7 @@
  * Style commun (cadre, en-tête, cellules, séparations) ; le style propre à une colonne reste dans la page.
  */
 @utility data-table {
-  @apply w-full border-separate border-spacing-0 overflow-hidden rounded-lg border border-foreground-secondary text-left text-sm;
+  @apply w-full border-separate border-spacing-0 rounded-lg border border-foreground-secondary text-left text-sm;
 
   & thead {
     @apply bg-foreground-secondary/20 font-title text-lg;

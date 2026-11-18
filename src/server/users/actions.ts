@@ -2,8 +2,12 @@
 
 import { auth } from "@/server/auth";
 import { requireAdmin } from "@/server/auth/queries";
+import { db } from "@/server/db";
+import { user } from "@/server/db/schema/auth";
+import { getUserIdsWithPassword } from "@/server/users/queries";
 import { isRole } from "@/utils/userRoles";
 import { isAPIError } from "better-auth/api";
+import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 
@@ -166,6 +170,59 @@ export async function inviteUser(
   });
 
   // Rafraîchit la liste des comptes, où apparaît le nouveau compte
+  revalidatePath("/users");
+  return { sent: true };
+}
+
+/**
+ * Renvoie un lien d'accès à un compte : l'invitation s'il n'a pas encore de mot de passe, sinon un lien de réinitialisation.
+ *  - Réservé aux admins : `requireAdmin()` renvoie vers `/login` ou une 404, et Better Auth vérifie à nouveau.
+ *  - Le serveur choisit l'e-mail d'après la base, jamais d'après ce qu'envoie le navigateur.
+ *  - Un compte désactivé n'est réactivé (via `enableUser`) que si `options.unban` vaut `true` ; sinon, erreur.
+ *  - Fonctionne aussi pour son propre compte : c’est le seul moyen de changer son mot de passe depuis l’interface actuellement.
+ *  - Les liens envoyés avant restent valables jusqu'à leur expiration ; le mot de passe actuel ne change pas tant que le lien n'est pas utilisé.
+ *
+ * @param userId - l'id du compte visé
+ * @param options - `unban: true` pour réactiver un compte désactivé avant l'envoi (après confirmation de l'admin)
+ * @returns `{ sent: true }` une fois l'e-mail demandé
+ */
+export async function sendAccessLink(
+  userId: string,
+  options?: { unban?: boolean },
+) {
+  // Vérifie qu'un admin est connecté avant de continuer
+  await requireAdmin();
+
+  // Lit l'adresse et le statut en base : on ne se fie pas à une adresse envoyée par le navigateur
+  const [target] = await db
+    .select({ email: user.email, banned: user.banned })
+    .from(user)
+    .where(eq(user.id, userId));
+  if (!target) {
+    throw new Error("Compte introuvable.");
+  }
+
+  // Un compte désactivé ne peut pas se connecter, même avec un nouveau mot de passe : il faut d'abord le réactiver, et seulement si l'admin l'a confirmé
+  if (target.banned) {
+    if (!options?.unban) {
+      throw new Error(
+        "Compte désactivé : réactivez-le avant d'envoyer un lien.",
+      );
+    }
+    await enableUser(userId);
+  }
+
+  // Sans mot de passe, c'est un invité : `?invite=1` fait choisir l'e-mail d'invitation à `sendResetPassword`
+  const hasPassword = (await getUserIdsWithPassword()).has(userId);
+  await auth.api.requestPasswordReset({
+    headers: await headers(),
+    body: {
+      email: target.email,
+      redirectTo: hasPassword ? "/reset-password" : "/reset-password?invite=1",
+    },
+  });
+
+  // Rafraîchit la liste des comptes : la pastille change si le compte a été réactivé
   revalidatePath("/users");
   return { sent: true };
 }

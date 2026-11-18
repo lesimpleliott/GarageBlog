@@ -1,5 +1,6 @@
 import InviteUserForm from "@/blocks/users/InviteUserForm";
 import RoleSelect from "@/blocks/users/RoleSelect";
+import SendAccessLinkButton from "@/blocks/users/SendAccessLinkButton";
 import { Pill } from "@/components/Pill";
 import Tooltip from "@/components/Tooltip";
 import { requireAdmin } from "@/server/auth/queries";
@@ -47,6 +48,9 @@ export default async function UsersPage() {
                 Statut
               </th>
               <th scope="col">Création</th>
+              <th scope="col" className="text-center">
+                Action
+              </th>
             </tr>
           </thead>
 
@@ -55,13 +59,11 @@ export default async function UsersPage() {
             {allUsers.map((user) => {
               const isCurrentUser = session.user.id === user.id;
 
-              const status =
-                USER_STATUS[
-                  getUserStatus(
-                    user.banned ?? false,
-                    usersWithPassword.has(user.id),
-                  )
-                ];
+              const statusKey = getUserStatus(
+                user.banned ?? false,
+                usersWithPassword.has(user.id),
+              );
+              const status = USER_STATUS[statusKey];
 
               return (
                 <tr key={user.id}>
@@ -134,6 +136,15 @@ export default async function UsersPage() {
                     <time dateTime={user.createdAt.toISOString()}>
                       {dateTimeFormatter.format(user.createdAt)}
                     </time>
+                  </td>
+
+                  {/* Actions */}
+                  <td className="text-center text-foreground-secondary">
+                    <SendAccessLinkButton
+                      userName={user.name}
+                      userId={user.id}
+                      status={statusKey}
+                    />
                   </td>
                 </tr>
               );

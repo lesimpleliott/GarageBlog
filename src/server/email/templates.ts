@@ -4,7 +4,7 @@
  */
 
 /**
- * E-mail de mot de passe oublié, envoyé quand quelqu'un le demande sur `/forgot-password`.
+ * E-mail de mot de passe oublié, envoyé quand quelqu'un le demande sur `/forgot-password`, ou par un admin depuis `/users`.
  *
  * @param name - le nom du compte
  * @param url - le lien de réinitialisation à usage unique, fourni par Better Auth
@@ -22,7 +22,7 @@ export function resetPasswordEmail({
     text: [
       `Bonjour ${name},`,
       "",
-      "Vous avez demandé à réinitialiser le mot de passe de votre compte Garage Blog.",
+      "Une réinitialisation du mot de passe de votre compte Garage Blog a été demandée.",
       "Pour en choisir un nouveau, suivez ce lien :",
       "",
       url,
