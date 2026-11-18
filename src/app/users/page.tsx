@@ -1,16 +1,20 @@
 import InviteUserForm from "@/blocks/users/InviteUserForm";
 import RoleSelect from "@/blocks/users/RoleSelect";
+import { Pill } from "@/components/Pill";
 import Tooltip from "@/components/Tooltip";
 import { requireAdmin } from "@/server/auth/queries";
 import { disableUser, enableUser, setUserRole } from "@/server/users/actions";
-import { getUsers } from "@/server/users/queries";
+import { getUserIdsWithPassword, getUsers } from "@/server/users/queries";
 import { dateTimeFormatter } from "@/utils/date";
-import { isRole, ROLE_LABELS } from "@/utils/roles";
-import clsx from "clsx";
+import { isRole, ROLE_LABELS } from "@/utils/userRoles";
+import { getUserStatus, USER_STATUS } from "@/utils/userStatus";
 
 export default async function UsersPage() {
   const session = await requireAdmin();
-  const allUsers = await getUsers();
+  const [allUsers, usersWithPassword] = await Promise.all([
+    getUsers(),
+    getUserIdsWithPassword(),
+  ]); // Évite d'avoir 2 `await` à la suite pour `getUsers` et `getUserIdsWithPassword`
 
   return (
     <>
@@ -51,15 +55,13 @@ export default async function UsersPage() {
             {allUsers.map((user) => {
               const isCurrentUser = session.user.id === user.id;
 
-              const pillsClasses = clsx(
-                "rounded-full px-2 py-0.5 text-xs",
-                user.banned
-                  ? "border border-red-600/50 bg-red-600/15 text-red-600 hover:bg-red-600/25"
-                  : "border border-green-600/50 bg-green-600/15 text-green-600 hover:bg-green-600/25",
-              );
-
-              // Texte visible de la pastille, repris au début de l'`aria-label` du bouton
-              const statusLabel = user.banned ? "Désactivé" : "Actif";
+              const status =
+                USER_STATUS[
+                  getUserStatus(
+                    user.banned ?? false,
+                    usersWithPassword.has(user.id),
+                  )
+                ];
 
               return (
                 <tr key={user.id}>
@@ -106,14 +108,7 @@ export default async function UsersPage() {
                         content="Impossible de modifier son propre statut"
                         position="right"
                       >
-                        <span
-                          className={clsx(
-                            "cursor-not-allowed opacity-50",
-                            pillsClasses,
-                          )}
-                        >
-                          {statusLabel}
-                        </span>
+                        <Pill text={status.label} tone={status.tone} disabled />
                       </Tooltip>
                     ) : (
                       <form
@@ -125,14 +120,10 @@ export default async function UsersPage() {
                       >
                         <button
                           type="submit"
-                          // Annonce l'état puis l'action du clic, qui est l'inverse de l'état
-                          aria-label={`${statusLabel} : ${user.banned ? "réactiver" : "désactiver"} le compte de ${user.name}`}
-                          className={clsx(
-                            "cursor-pointer transition-all hover:scale-107",
-                            pillsClasses,
-                          )}
+                          aria-label={`${status.label} : ${user.banned ? "réactiver" : "désactiver"} le compte de ${user.name}`}
+                          className="cursor-pointer transition-all hover:scale-108"
                         >
-                          {statusLabel}
+                          <Pill text={status.label} tone={status.tone} />
                         </button>
                       </form>
                     )}

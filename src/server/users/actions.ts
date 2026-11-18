@@ -2,7 +2,7 @@
 
 import { auth } from "@/server/auth";
 import { requireAdmin } from "@/server/auth/queries";
-import { isRole } from "@/utils/roles";
+import { isRole } from "@/utils/userRoles";
 import { isAPIError } from "better-auth/api";
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";

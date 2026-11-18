@@ -1,7 +1,7 @@
 "use client";
 
 import { inviteUser, type InviteUserFormState } from "@/server/users/actions";
-import { ROLE_LABELS } from "@/utils/roles";
+import { ROLE_LABELS } from "@/utils/userRoles";
 import clsx from "clsx";
 import { useActionState, useEffect, useState } from "react";
 

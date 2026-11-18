@@ -1,6 +1,6 @@
 "use client";
 
-import { isRole, ROLE_LABELS } from "@/utils/roles";
+import { isRole, ROLE_LABELS } from "@/utils/userRoles";
 import { faSave } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import clsx from "clsx";
