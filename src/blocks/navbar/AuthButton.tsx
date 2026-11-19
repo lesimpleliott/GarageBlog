@@ -24,7 +24,7 @@ export default async function AuthButton() {
             title={`Connecté : ${session.user.name}`}
             className={clsx(iconClassName, "hover:text-red-600")}
           >
-            <p className="mr-1 text-sm italic">({session.user.name})</p>
+            <span className="mr-1 text-sm italic">({session.user.name})</span>
             <FontAwesomeIcon icon={faSignOut} />
           </button>
         </form>

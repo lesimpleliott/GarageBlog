@@ -123,6 +123,7 @@ export default async function UsersPage() {
                       >
                         <button
                           type="submit"
+                          // Annonce l'état puis l'action du clic, qui est l'inverse de l'état
                           aria-label={`${status.label} : ${user.banned ? "réactiver" : "désactiver"} le compte de ${user.name}`}
                           className="cursor-pointer transition-all hover:scale-108"
                         >
