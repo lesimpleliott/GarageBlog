@@ -226,3 +226,33 @@ export async function sendAccessLink(
   revalidatePath("/users");
   return { sent: true };
 }
+
+/**
+ * Supprime définitivement un compte, via le guichet `removeUser` de Better Auth, puis rafraîchit les pages concernées.
+ *  - Réservé aux admins : `requireAdmin()` renvoie vers `/login` ou une 404, et Better Auth vérifie à nouveau.
+ *  - Refuse de supprimer son propre compte : seul un autre admin peut le faire.
+ *  - Better Auth supprime aussi ses sessions et son mot de passe (`account`), et la base supprime ses articles (`onDelete: "cascade"`).
+ *  - Irréversible : la confirmation se fait avant, côté interface.
+ *
+ * @param userId - l'id du compte visé
+ */
+export async function deleteUser(userId: string) {
+  // Vérifie qu'un admin est connecté avant de continuer
+  const session = await requireAdmin();
+
+  // Rend impossible la modification de son propre compte
+  if (session.user.id === userId) {
+    throw new Error("Impossible de supprimer son propre compte.");
+  }
+
+  // Supprime le compte `user` et ses `articles`, par la cascade de la base.
+  // Les en-têtes portent le cookie : Better Auth vérifie que c'est un admin qui demande
+  await auth.api.removeUser({
+    headers: await headers(),
+    body: { userId: userId },
+  });
+
+  // Rafraîchir la liste des comptes et celle des articles
+  revalidatePath("/users");
+  revalidatePath("/articles");
+}

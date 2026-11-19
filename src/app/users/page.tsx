@@ -1,3 +1,4 @@
+import DeleteUserButton from "@/blocks/users/DeleteUserButton";
 import InviteUserForm from "@/blocks/users/InviteUserForm";
 import RoleSelect from "@/blocks/users/RoleSelect";
 import SendAccessLinkButton from "@/blocks/users/SendAccessLinkButton";
@@ -49,7 +50,7 @@ export default async function UsersPage() {
               </th>
               <th scope="col">Création</th>
               <th scope="col" className="text-center">
-                Action
+                Actions
               </th>
             </tr>
           </thead>
@@ -140,11 +141,21 @@ export default async function UsersPage() {
 
                   {/* Actions */}
                   <td className="text-center text-foreground-secondary">
-                    <SendAccessLinkButton
-                      userName={user.name}
-                      userId={user.id}
-                      status={statusKey}
-                    />
+                    {isCurrentUser ? (
+                      <p className="cursor-not-allowed italic">N/A</p>
+                    ) : (
+                      <div className="flex justify-center gap-2">
+                        <SendAccessLinkButton
+                          userName={user.name}
+                          userId={user.id}
+                          status={statusKey}
+                        />
+                        <DeleteUserButton
+                          userId={user.id}
+                          userName={user.name}
+                        />
+                      </div>
+                    )}
                   </td>
                 </tr>
               );

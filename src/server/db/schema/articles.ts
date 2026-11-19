@@ -17,7 +17,7 @@ export const articles = mysqlTable("articles", {
     .notNull()
     .references(
       () => user.id, // clé étrangère : pointe vers la colonne `id` du tableau `user`.
-      { onDelete: "restrict" }, // la base refuse de supprimer un compte qui a des articles.
+      { onDelete: "cascade" }, // Lors de la suppression d'un user, ses articles sont également supprimés.
     ),
   createdAt: datetime("created_at")
     .notNull()

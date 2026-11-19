@@ -1,6 +1,5 @@
 "use client";
 
-import Tooltip from "@/components/Tooltip";
 import { sendAccessLink } from "@/server/users/actions";
 import type { UserStatus } from "@/utils/userStatus";
 import {
@@ -65,29 +64,28 @@ export default function SendAccessLinkButton({
   return (
     <button
       type="button"
+      title={`${LABELS[status]} "${userName}"`}
       onClick={handleClick}
       disabled={isPending || result === "sent"} // Empêche un double envoi
-      aria-label={`${LABELS[status]} ${userName}`}
+      aria-label={`${LABELS[status]} "${userName}"`}
       className="cursor-pointer transition-all hover:scale-110 disabled:cursor-not-allowed disabled:opacity-50"
     >
-      <Tooltip content={`${LABELS[status]} "${userName}"`} position="left">
-        {result === "sent" ? (
-          // Lien envoyé
-          <FontAwesomeIcon icon={faCheck} className="text-green-500" />
-        ) : result === "error" ? (
-          // Erreur lors de l'envoi du lien
-          <FontAwesomeIcon
-            icon={faTriangleExclamation}
-            className="text-red-500"
-          />
-        ) : (
-          // Bouton d'envoi
-          <FontAwesomeIcon
-            icon={faArrowRotateLeft}
-            className="transition-all hover:-rotate-45 hover:text-foreground"
-          />
-        )}
-      </Tooltip>
+      {result === "sent" ? (
+        // Lien envoyé
+        <FontAwesomeIcon icon={faCheck} className="text-green-500" />
+      ) : result === "error" ? (
+        // Erreur lors de l'envoi du lien
+        <FontAwesomeIcon
+          icon={faTriangleExclamation}
+          className="text-red-500"
+        />
+      ) : (
+        // Bouton d'envoi
+        <FontAwesomeIcon
+          icon={faArrowRotateLeft}
+          className="transition-all hover:-rotate-45 hover:text-foreground"
+        />
+      )}
     </button>
   );
 }
