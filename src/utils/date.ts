@@ -8,6 +8,12 @@ export const dateTimeFormatter = new Intl.DateTimeFormat(LOCALE, {
   timeZone: TIME_ZONE,
 });
 
+/** Date simple au format : « 07/11/2026 ». */
+export const dateFormatter = new Intl.DateTimeFormat(LOCALE, {
+  dateStyle: "short",
+  timeZone: TIME_ZONE,
+});
+
 /**
  * Date au format attendu par un champ `datetime-local` (« 2026-11-24T09:00 »), à l'heure locale du navigateur.
  *

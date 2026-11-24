@@ -3,6 +3,7 @@ import { sql } from "drizzle-orm";
 import {
   datetime,
   int,
+  mysqlEnum,
   mysqlTable,
   text,
   varchar,
@@ -22,6 +23,10 @@ export const articles = mysqlTable("articles", {
   createdAt: datetime("created_at")
     .notNull()
     .default(sql`CURRENT_TIMESTAMP`),
+  status: mysqlEnum("status", ["draft", "published"])
+    .notNull()
+    .default("draft"), // Un nouvel article est un brouillon
+  publishedAt: datetime("published_at"), // Date de publication : obligatoire si `published`, dans le futur = programmé
 });
 
 /** TYPE : Un article tel qu'il est lu dans la base. */
