@@ -1,8 +1,11 @@
 import DeleteArticleButton from "@/blocks/articles/DeleteArticleButton";
+import EditArticleBanner from "@/blocks/articles/EditArticleBanner";
+import { Pill } from "@/components/Pill";
 import { deleteArticle } from "@/server/articles/actions";
 import { canEditArticle } from "@/server/articles/permissions";
 import { getArticle } from "@/server/articles/queries";
 import { getSession } from "@/server/auth/queries";
+import { ARTICLE_STATUS, getArticleStatus } from "@/utils/articleStatus";
 import { dateTimeFormatter } from "@/utils/date";
 import { faEdit } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -18,17 +21,24 @@ export default async function ArticlePage({
 
   // Fonction de suppression d'un article
   const deleteThisArticle = deleteArticle.bind(null, article.id);
+  const statusKey = getArticleStatus(article);
+  const status = ARTICLE_STATUS[statusKey];
 
   return (
     <>
-      <h1>{article.title}</h1>
+      <div className="flex items-center justify-between gap-4">
+        <h1>{article.title}</h1>
+        {session && <Pill tone={status.tone} text={status.label} />}
+      </div>
 
       <div className="flex items-center justify-between">
         <p className="text-sm text-foreground-secondary">
-          Écrit par <strong>{article.authorName}</strong>{" "}
-          <time dateTime={article.createdAt.toISOString()}>
-            le {dateTimeFormatter.format(article.createdAt)}
-          </time>
+          Écrit par <strong>{article.authorName}</strong>
+          {statusKey !== "draft" && article.publishedAt && (
+            <time dateTime={article.publishedAt.toISOString()}>
+              , publié le {dateTimeFormatter.format(article.publishedAt)}
+            </time>
+          )}
         </p>
         {canEdit && (
           <div className="flex items-center gap-4 text-sm">
@@ -42,6 +52,14 @@ export default async function ArticlePage({
           </div>
         )}
       </div>
+
+      {canEdit && statusKey !== "published" && (
+        <EditArticleBanner
+          articleId={article.id}
+          status={statusKey}
+          publishedAt={article.publishedAt}
+        />
+      )}
 
       <p className="mt-4 border-t border-foreground-secondary pt-4">
         {article.body}

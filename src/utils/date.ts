@@ -24,3 +24,27 @@ export function toDateTimeLocalValue(date: Date) {
   const pad = (n: number) => String(n).padStart(2, "0"); // 9 → "09"
   return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
 }
+
+/**
+ * Date proposée par défaut pour programmer une publication : demain à 9 h, à l'heure locale du navigateur.
+ * À calculer au moment où l'on en a besoin (ex. quand on coche « Programmer »), pas au chargement de la page.
+ *
+ * @returns la valeur à donner à un champ `datetime-local` (« 2026-11-25T09:00 »)
+ */
+export function getDefaultScheduleValue(): string {
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1); // +1 jour (gère tout seul le passage au mois suivant)
+  tomorrow.setHours(9, 0, 0, 0); // 9 h 00 min 00 s 000 ms
+  return toDateTimeLocalValue(tomorrow);
+}
+
+/**
+ * Vérifie qu'une valeur de champ `datetime-local` est dans le futur, par exemple avant de programmer une publication.
+ * Une valeur vide ou invalide donne une date invalide, qui n'est jamais « dans le futur » : la fonction renvoie alors `false`.
+ *
+ * @param value - la valeur du champ (« 2026-11-25T09:00 »), à l'heure locale du navigateur
+ * @returns `true` si la date est après maintenant, `false` sinon
+ */
+export function isFutureDateValue(value: string): boolean {
+  return new Date(value) > new Date();
+}

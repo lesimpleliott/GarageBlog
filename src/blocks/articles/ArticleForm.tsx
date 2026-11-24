@@ -2,7 +2,11 @@
 
 import type { ArticleFormState } from "@/server/articles/actions";
 import type { ArticleFields } from "@/server/db/schema/articles";
-import { toDateTimeLocalValue } from "@/utils/date";
+import {
+  getDefaultScheduleValue,
+  isFutureDateValue,
+  toDateTimeLocalValue,
+} from "@/utils/date";
 import clsx from "clsx";
 import {
   type ChangeEvent,
@@ -41,8 +45,7 @@ export default function ArticleForm({
   const [state, formAction, pending] = useActionState(action, initialState);
   const [isScheduled, setIsScheduled] = useState(false);
   const [scheduledDate, setScheduledDate] = useState("");
-  const isValidSchedule =
-    scheduledDate !== "" && new Date(scheduledDate) > new Date();
+  const isValidSchedule = isFutureDateValue(scheduledDate);
 
   /**
    * Envoie le formulaire à la main, au lieu de `<form action>`.
@@ -59,10 +62,7 @@ export default function ArticleForm({
     setIsScheduled(e.target.checked);
 
     if (e.target.checked) {
-      const tomorrow = new Date();
-      tomorrow.setDate(tomorrow.getDate() + 1); // +1 jour (gère tout seul le passage au mois suivant)
-      tomorrow.setHours(9, 0, 0, 0); // 9 h 00 min 00 s 000 ms
-      setScheduledDate(toDateTimeLocalValue(tomorrow));
+      setScheduledDate(getDefaultScheduleValue());
     }
   }
 
