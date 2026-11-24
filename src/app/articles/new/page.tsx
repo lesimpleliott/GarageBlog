@@ -9,7 +9,7 @@ export default async function NewArticlePage() {
   return (
     <>
       <h1>Nouvel article</h1>
-      <ArticleForm action={createArticle} />
+      <ArticleForm action={createArticle} mode="create" />
     </>
   );
 }

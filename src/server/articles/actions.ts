@@ -53,7 +53,41 @@ function validateArticle(formData: FormData): ArticleValidation {
   return { ok: true, data: { title, body } };
 }
 
-/** CREER UN ARTICLE */
+/**
+ * Transforme la date reçue en `Date`, pour `createArticle` et `publishArticle`.
+ *
+ * @param publishAt - la date au format ISO, en UTC ; absente = maintenant, à l'heure du serveur
+ * @returns la date de publication
+ * @throws si la date reçue n'est pas une date valide
+ */
+function parsePublishDate(publishAt: string | undefined): Date {
+  // Détermine la date
+  const date = publishAt ? new Date(publishAt) : new Date();
+
+  // Vérifie le format de la date
+  if (Number.isNaN(date.getTime())) {
+    throw new Error("Date de publication invalide.");
+  }
+
+  return date;
+}
+
+/**
+ * Crée un article au nom de l'utilisateur connecté, puis renvoie vers la liste.
+ *
+ * Le bouton cliqué (`intent`) choisit le statut :
+ *  - `draft` : brouillon, sans date de publication ;
+ *  - `publish` : publié à la date reçue (`publishAt`, voir `parsePublishDate`), ou tout de suite si elle est absente.
+ *    Une date future rend l'article « programmé ».
+ *
+ * Réservé aux utilisateurs connectés (`requireSession`) : sinon, lance une erreur.
+ * Lance aussi une erreur si `intent` n'est ni `draft` ni `publish`, ou si la date est invalide.
+ * Si la saisie est invalide, rien n'est écrit et les erreurs sont renvoyées au formulaire.
+ *
+ * @param _prevState - l'état précédent du formulaire, transmis par `useActionState` (inutilisé)
+ * @param formData - les champs envoyés par le formulaire (`title`, `body`, `intent`, et `publishAt` en option)
+ * @returns les erreurs et la saisie à réafficher, si la saisie est invalide
+ */
 export async function createArticle(
   _prevState: ArticleFormState,
   formData: FormData,
@@ -66,10 +100,24 @@ export async function createArticle(
     return result.state;
   }
 
-  // INSERT INTO articles (title, body, author_id) VALUES (...)
-  await db
-    .insert(articles)
-    .values({ ...result.data, authorId: session.user.id });
+  // Récupère le bouton cliqué : brouillon ou publication
+  const intent = formData.get("intent");
+  // Refuse une valeur inattendue (formulaire trafiqué).
+  if (intent !== "publish" && intent !== "draft") {
+    throw new Error("Statut invalide.");
+  }
+
+  // Récupère la date de publication indiquée ou actuelle
+  const rawPublishAt = formData.get("publishAt");
+  const publishAt = typeof rawPublishAt === "string" ? rawPublishAt : undefined;
+
+  // INSERT INTO articles (title, body, author_id, status, published_at) VALUES (...)
+  await db.insert(articles).values({
+    ...result.data,
+    authorId: session.user.id,
+    status: intent === "publish" ? "published" : "draft",
+    publishedAt: intent === "publish" ? parsePublishDate(publishAt) : null,
+  });
 
   // Rafraîchit la liste des articles et y renvoie l'utilisateur
   revalidatePath("/articles");
@@ -124,4 +172,60 @@ export async function deleteArticle(articleId: number) {
 
   revalidatePath("/articles");
   redirect("/articles");
+}
+
+/**
+ * Publie un article, tout de suite ou à une date choisie, puis rafraîchit la liste et la page de l'article.
+ *
+ * Réservé à l'auteur de l'article ou à un admin (`requireEditableArticle`) : sinon, lance une erreur.
+ * Lance aussi une erreur si la date reçue n'est pas une date valide.
+ * Une date dans le futur rend l'article « programmé » : il reste caché aux visiteurs jusqu'à cette date (voir `getArticles`).
+ * Une date passée est acceptée : l'article est publié tout de suite, avec cette date.
+ *
+ * @param articleId - l'id de l'article
+ * @param publishAt - la date de publication au format ISO, en UTC (`toISOString()` côté navigateur) ; absente = maintenant, à l'heure du serveur
+ */
+export async function publishArticle(articleId: number, publishAt?: string) {
+  // Vérifie que l'article existe et que l'utilisateur a la permission d'édition de celui-ci
+  await requireEditableArticle(articleId);
+
+  // Calcul de la date
+  const publishedAt = parsePublishDate(publishAt);
+
+  if (Number.isNaN(publishedAt.getTime())) {
+    throw new Error("Date de publication invalide.");
+  }
+
+  // UPDATE du tableau `articles`
+  await db
+    .update(articles)
+    .set({ status: "published", publishedAt: publishedAt })
+    .where(eq(articles.id, articleId));
+
+  // Rafraîchit la liste des articles et la page de l'article
+  revalidatePath("/articles");
+  revalidatePath(`/articles/${articleId}`);
+}
+
+/**
+ * Repasse un article en brouillon, puis rafraîchit la liste et la page de l'article.
+ * La date de publication est effacée : la prochaine publication choisira la sienne.
+ *
+ * Réservé à l'auteur de l'article ou à un admin (`requireEditableArticle`) : sinon, lance une erreur.
+ *
+ * @param articleId - l'id de l'article
+ */
+export async function unpublishArticle(articleId: number) {
+  // Vérifie que l'article existe et que l'utilisateur a la permission d'édition de celui-ci
+  await requireEditableArticle(articleId);
+
+  // UPDATE du tableau `articles`
+  await db
+    .update(articles)
+    .set({ status: "draft", publishedAt: null })
+    .where(eq(articles.id, articleId));
+
+  // Rafraîchit la liste des articles et la page de l'article
+  revalidatePath("/articles");
+  revalidatePath(`/articles/${articleId}`);
 }

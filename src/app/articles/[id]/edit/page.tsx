@@ -25,6 +25,7 @@ export default async function EditArticlePage({
       <h1>Edit {article.title}</h1>
 
       <ArticleForm
+        mode="edit"
         action={updateThisArticle}
         defaultValues={{ title: article.title, body: article.body }}
       />

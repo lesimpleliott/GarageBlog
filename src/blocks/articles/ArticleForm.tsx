@@ -2,8 +2,15 @@
 
 import type { ArticleFormState } from "@/server/articles/actions";
 import type { ArticleFields } from "@/server/db/schema/articles";
+import { toDateTimeLocalValue } from "@/utils/date";
 import clsx from "clsx";
-import { useActionState } from "react";
+import {
+  type ChangeEvent,
+  type SubmitEvent,
+  startTransition,
+  useActionState,
+  useState,
+} from "react";
 
 type ArticleFormProps = {
   action: (
@@ -11,6 +18,7 @@ type ArticleFormProps = {
     formData: FormData,
   ) => Promise<ArticleFormState>;
   defaultValues?: ArticleFields;
+  mode: "create" | "edit";
 };
 
 // Réponse de départ, vide : le serveur n'a encore rien répondu
@@ -20,6 +28,7 @@ const initialState: ArticleFormState = {};
 export default function ArticleForm({
   action,
   defaultValues,
+  mode,
 }: ArticleFormProps) {
   // Hook useActionState
   // Reçoit :
@@ -27,12 +36,42 @@ export default function ArticleForm({
   //    - `initialState` : la réponse de départ, vide
   // Renvoie :
   //    - `state` : la dernière réponse du serveur
-  //    - `formAction` : `action` enveloppée, à donner au <form>
+  //    - `formAction` : `action` enveloppée, appelée par `handleSubmit`
   //    - `pending` : true pendant l'envoi, false sinon
   const [state, formAction, pending] = useActionState(action, initialState);
+  const [isScheduled, setIsScheduled] = useState(false);
+  const [scheduledDate, setScheduledDate] = useState("");
+  const isValidSchedule =
+    scheduledDate !== "" && new Date(scheduledDate) > new Date();
+
+  /**
+   * Envoie le formulaire à la main, au lieu de `<form action>`.
+   * Une action appelée à la main doit l'être dans une transition : c'est aussi ce qui met `pending` à jour.
+   */
+  function handleSubmit(e: SubmitEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget, e.nativeEvent.submitter);
+    startTransition(() => formAction(formData));
+  }
+
+  /** Coche ou décoche « Programmer la publication ». À chaque fois qu'on coche, la date repart de demain à 9 h. */
+  function handleScheduleChange(e: ChangeEvent<HTMLInputElement>) {
+    setIsScheduled(e.target.checked);
+
+    if (e.target.checked) {
+      const tomorrow = new Date();
+      tomorrow.setDate(tomorrow.getDate() + 1); // +1 jour (gère tout seul le passage au mois suivant)
+      tomorrow.setHours(9, 0, 0, 0); // 9 h 00 min 00 s 000 ms
+      setScheduledDate(toDateTimeLocalValue(tomorrow));
+    }
+  }
 
   return (
-    <form action={formAction} noValidate className="mt-4 flex flex-col gap-4">
+    <form
+      onSubmit={handleSubmit}
+      noValidate
+      className="mt-4 flex flex-col gap-4"
+    >
       <label className="flex flex-col gap-1">
         Titre
         <input
@@ -65,17 +104,99 @@ export default function ArticleForm({
         </span>
       </label>
 
-      <button
-        type="submit"
-        className={clsx(
-          "cursor-pointer self-start rounded border px-3 py-1",
-          "transition-colors hover:bg-foreground-secondary",
-          "disabled:cursor-not-allowed disabled:text-foreground-secondary disabled:italic",
-        )}
-        disabled={pending}
-      >
-        {pending ? "Publication..." : "Publier"}
-      </button>
+      {mode === "create" ? (
+        <section className="space-y-4">
+          <div className="flex h-6 items-center gap-6">
+            <label className="space-x-2">
+              <input
+                type="checkbox"
+                checked={isScheduled}
+                onChange={handleScheduleChange}
+              />
+              <span
+                className={clsx(
+                  !isScheduled && "text-foreground-secondary italic",
+                  "select-none",
+                )}
+              >
+                Programmer la publication
+              </span>
+            </label>
+            {isScheduled && (
+              <input
+                type="datetime-local"
+                value={scheduledDate}
+                min={toDateTimeLocalValue(new Date())}
+                onChange={(e) => setScheduledDate(e.target.value)}
+                className="rounded border border-foreground-secondary bg-foreground/10 p-1 text-sm italic"
+                aria-label="Date et heure de publication"
+                aria-invalid={!isValidSchedule}
+                aria-describedby="schedule-error"
+              />
+            )}
+            {isScheduled && !isValidSchedule && (
+              <span id="schedule-error" className="text-sm text-red-600">
+                La date doit être dans le futur.
+              </span>
+            )}
+
+            {isScheduled && scheduledDate && (
+              <input
+                type="hidden"
+                name="publishAt"
+                value={new Date(scheduledDate).toISOString()}
+              />
+            )}
+          </div>
+          <div className="flex gap-4">
+            <button
+              type="submit"
+              name="intent"
+              value="publish"
+              disabled={pending || (isScheduled && !isValidSchedule)}
+              className={clsx(
+                "min-w-32",
+                "cursor-pointer self-start rounded border px-3 py-1",
+                "transition-colors hover:bg-foreground-secondary",
+                "disabled:cursor-not-allowed disabled:text-foreground-secondary disabled:italic",
+              )}
+            >
+              {pending
+                ? "Publication..."
+                : isScheduled
+                  ? "Programmer"
+                  : "Publier"}
+            </button>
+            <button
+              type="submit"
+              name="intent"
+              value="draft"
+              disabled={pending}
+              className={clsx(
+                "min-w-32",
+                "cursor-pointer self-start rounded border px-3 py-1",
+                "transition-colors hover:bg-foreground-secondary",
+                "disabled:cursor-not-allowed disabled:text-foreground-secondary disabled:italic",
+              )}
+            >
+              {pending ? "Enregistrement..." : "Brouillon"}
+            </button>
+          </div>
+        </section>
+      ) : (
+        <button
+          type="submit"
+          disabled={pending}
+          className={clsx(
+            "min-w-32",
+            "cursor-pointer self-start rounded border px-3 py-1",
+            "transition-colors hover:bg-foreground-secondary",
+            "disabled:cursor-not-allowed disabled:text-foreground-secondary disabled:italic",
+          )}
+        >
+          {pending ? "Enregistrement..." : "Enregistrer"}
+        </button>
+      )}
     </form>
   );
 }
