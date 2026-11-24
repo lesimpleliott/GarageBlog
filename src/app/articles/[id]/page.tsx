@@ -1,7 +1,8 @@
 import DeleteArticleButton from "@/blocks/articles/DeleteArticleButton";
 import EditArticleBanner from "@/blocks/articles/EditArticleBanner";
+import UnpublishArticleButton from "@/blocks/articles/UnpublishArticleButton";
 import { Pill } from "@/components/Pill";
-import { deleteArticle } from "@/server/articles/actions";
+import { deleteArticle, unpublishArticle } from "@/server/articles/actions";
 import { canEditArticle } from "@/server/articles/permissions";
 import { getArticle } from "@/server/articles/queries";
 import { getSession } from "@/server/auth/queries";
@@ -21,6 +22,7 @@ export default async function ArticlePage({
 
   // Fonction de suppression d'un article
   const deleteThisArticle = deleteArticle.bind(null, article.id);
+  const unpublishThisArticle = unpublishArticle.bind(null, article.id);
   const statusKey = getArticleStatus(article);
   const status = ARTICLE_STATUS[statusKey];
 
@@ -42,6 +44,12 @@ export default async function ArticlePage({
         </p>
         {canEdit && (
           <div className="flex items-center gap-4 text-sm">
+            {statusKey !== "draft" && (
+              <UnpublishArticleButton
+                action={unpublishThisArticle}
+                needsConfirm={statusKey === "published"}
+              />
+            )}
             <Link
               href={`/articles/${article.id}/edit`}
               className="transition-colors hover:text-foreground-secondary"
